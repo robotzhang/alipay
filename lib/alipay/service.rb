@@ -100,7 +100,6 @@ module Alipay
     end
 
     def self.query_string(options)
-      options.delete('key')
       options.merge('sign_type' => 'MD5', 'sign' => Alipay::Sign.generate(options)).map do |key, value|
         "#{CGI.escape(key.to_s)}=#{CGI.escape(value.to_s)}"
       end.join('&')
