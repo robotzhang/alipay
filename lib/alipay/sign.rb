@@ -5,11 +5,12 @@ require 'base64'
 module Alipay
   module Sign
     def self.generate(params)
+      secret_key = params.delete('key')
       query = params.sort.map do |key, value|
         "#{key}=#{value}"
       end.join('&')
 
-      Digest::MD5.hexdigest("#{query}#{Alipay.key}")
+      Digest::MD5.hexdigest("#{query}#{secret_key || Alipay.key}")
     end
 
     def self.verify?(params)
@@ -25,12 +26,13 @@ module Alipay
 
       def self.verify?(params)
         params = Utils.stringify_keys(params)
+        secret_key = params.delete('key')
 
         query = SORTED_VERIFY_PARAMS.map do |key|
           "#{key}=#{params[key]}"
         end.join('&')
 
-        params['sign'] == Digest::MD5.hexdigest("#{query}#{Alipay.key}")
+        params['sign'] == Digest::MD5.hexdigest("#{query}#{secret_key || Alipay.key}")
       end
     end
 
@@ -50,6 +52,7 @@ module Alipay
         digest = OpenSSL::Digest::SHA1.new
 
         params.delete('sign_type')
+        params.delete('key')
         sign = params.delete('sign')
         to_sign = params.sort.map { |item| item.join('=') }.join('&')
 
